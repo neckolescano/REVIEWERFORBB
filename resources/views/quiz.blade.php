@@ -136,6 +136,79 @@
             border-radius: 10px;
             overflow-x: auto;
         }
+        
+        /* 📱 MOBILE RESPONSIVE FIX */
+        @media (max-width: 768px) {
+
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                margin: 10px;
+                padding: 20px;
+                max-width: 100%;
+            }
+
+            .retro-title {
+                font-size: 1.5rem;
+            }
+
+            .retro-sub {
+                font-size: 0.7rem;
+            }
+
+            .question-text {
+                font-size: 1rem;
+            }
+
+            .option-label {
+                padding: 12px;
+                font-size: 0.9rem;
+            }
+
+            .btn {
+                width: 100%;
+                font-size: 0.9rem;
+                padding: 12px;
+            }
+
+            .nav-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .nav-controls > div {
+                width: 100%;
+            }
+
+            .nav-controls div:last-child {
+                flex-direction: column;
+            }
+
+            .start-btn {
+                font-size: 0.9rem;
+                padding: 14px;
+            }
+
+            .score-circle {
+                width: 120px;
+                height: 120px;
+            }
+
+            .score-num {
+                font-size: 1.8rem;
+            }
+
+            .percentage {
+                font-size: 1.1rem;
+            }
+
+            .ascii-container {
+                font-size: 8px;
+                overflow-x: auto;
+            }
+        }
 
         /* KEEPING YOUR ORIGINAL STYLES BELOW */
         h1 { font-size: 1.8rem; text-align: center; color: #38bdf8; margin-bottom: 5px; }
