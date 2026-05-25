@@ -1,8 +1,0 @@
-/vendor
-/storage/framework/cache/*
-/storage/framework/sessions/*
-/storage/framework/views/*
-.env
-.git
-.gitignore
-node_modules
