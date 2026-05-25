@@ -1,19 +1,24 @@
 FROM php:8.2-fpm
 
 # Install system dependencies
-RUN apt-get update && apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev zip git unzip
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg && docker-php-ext-install gd pdo pdo_mysql
+RUN apt-get update && apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev zip git unzip curl gnupg
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg && docker-php-ext-install gd
+
+# Install Node.js (v20)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && apt-get install -y nodejs
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /var/www
 COPY . .
 
-# Install PHP and Node dependencies
+# Install PHP dependencies first
 RUN composer install --no-dev --optimize-autoloader
-RUN apt-get install -y nodejs npm && npm install && npm run build
+
+# Install JS dependencies and build assets
+RUN npm install
+RUN npm run build
 
 # Setup permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
