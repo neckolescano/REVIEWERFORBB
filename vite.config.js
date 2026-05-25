@@ -15,4 +15,9 @@ export default defineConfig({
             ignored: ['**/storage/framework/views/**'],
         },
     },
+    // ADDED THIS FOR VERCEL COMPATIBILITY:
+    build: {
+        outDir: 'public/build',
+        emptyOutDir: true,
+    }
 });
