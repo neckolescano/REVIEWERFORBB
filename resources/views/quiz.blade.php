@@ -183,8 +183,8 @@
                  :style="`left:${Math.random()*100}%; animation-delay:${Math.random()*5}s;`">♥</div>
         </template>
 
-        <h1 class="retro-title">EARTH SCIENCE</h1>
-        <div class="retro-sub">A cute little quiz for you 💖</div>
+        <h1 class="retro-title">EARTH SCIENCE QUEST</h1>
+        <div class="retro-sub">A cute little quiz for you babyyy mwaa 💖</div>
 
         <div class="start-btn" @click="playClick(); gameState='playing'">
             ▶ PRESS START
@@ -322,7 +322,7 @@
                  }">
 
                 <template x-if="(finalScore / totalQuestions) >= 0.8">
-                    <span>🌟 Excellent! You're amazing!</span>
+                    <span>🌟 WoW! Very Good Mwaaaa!</span>
                 </template>
 
                 <template x-if="(finalScore / totalQuestions) >= 0.5 && (finalScore / totalQuestions) < 0.8">
