@@ -5,526 +5,379 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Earth Science Interactive Exam</title>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <style>
-        /* Modern Dark Theme Variables */
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #0f172a; /* Slate 900 */
-            color: #f1f5f9; /* Slate 100 */
+            font-family: 'Courier New', Courier, monospace; 
+            background: radial-gradient(circle at top, #0f172a, #020617);
+            color: #00ff41; 
             margin: 0; 
             padding: 20px; 
         }
+
         .container { 
-            max-width: 750px; /* Slightly widened to support the full art beautifully */
+            max-width: 750px; 
             margin: 40px auto; 
-            background: #1e293b; /* Slate 800 */
+            background: rgba(15,23,42,0.9); 
             padding: 35px; 
-            border-radius: 16px; 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); 
-            border: 1px solid #334155; /* Slate 700 */
-        }
-        h1 { 
-            font-size: 1.8rem; 
-            text-align: center; 
-            color: #38bdf8; /* Sky 400 */
-            margin-bottom: 5px; 
-        }
-        .subtitle { 
-            text-align: center; 
-            color: #94a3b8; /* Slate 400 */
-            font-size: 0.95rem; 
-            margin-bottom: 25px; 
-        }
-        
-        /* Progress Tracking */
-        .progress-container { 
-            background: #334155; 
-            height: 10px; 
-            border-radius: 6px; 
-            margin-bottom: 30px; 
-            overflow: hidden; 
-        }
-        .progress-bar { 
-            background: linear-gradient(90deg, #38bdf8, #0ea5e9); 
-            height: 100%; 
-            transition: width 0.3s ease; 
-        }
-        .status-text { 
-            font-size: 0.9rem; 
-            color: #94a3b8; 
-            font-weight: bold; 
-            text-align: right; 
-            margin-bottom: 15px; 
-        }
-        
-        /* Question Cards */
-        .question-card { 
-            animation: fadeIn 0.4s ease; 
-        }
-        .question-text { 
-            font-size: 1.25rem; 
-            font-weight: 600; 
-            color: #f8fafc; 
-            line-height: 1.6; 
-            margin-bottom: 25px; 
-        }
-        
-        /* Options Style */
-        .options-group { 
-            display: flex; 
-            flex-direction: column; 
-            gap: 14px; 
-            margin-bottom: 25px; 
-        }
-        .option-label { 
-            display: flex; 
-            align-items: center; 
-            padding: 16px 20px; 
-            background: #1e293b; 
-            border: 2px solid #475569; /* Slate 600 */
-            border-radius: 10px; 
-            cursor: pointer; 
-            transition: all 0.2s ease; 
-            font-weight: 500; 
-            color: #cbd5e1;
-        }
-        .option-label:hover { 
-            background: #334155; 
-            border-color: #64748b; 
-            color: #fff;
-        }
-        .option-label input { 
-            margin-right: 14px; 
-            transform: scale(1.3); 
-            cursor: pointer; 
-            accent-color: #38bdf8;
-        }
-        
-        /* Interactive States */
-        .option-label.selected { 
-            border-color: #38bdf8; 
-            background: #0c4a6e; /* Sky 900 */
-            color: #f0f9ff;
-        }
-        .option-label.correct-reveal { 
-            border-color: #4ade80 !important; /* Green 400 */
-            background: #064e3b !important; /* Green 900 */
-            color: #ecfdf5; 
-            font-weight: bold; 
-        }
-        .option-label.wrong-reveal { 
-            border-color: #f87171 !important; /* Red 400 */
-            background: #7f1d1d !important; /* Red 900 */
-            color: #fef2f2; 
-        }
-        
-        /* Explanatory Banner */
-        .feedback-banner { 
-            padding: 14px 20px; 
-            border-radius: 8px; 
-            margin-bottom: 20px; 
-            font-weight: bold; 
-            animation: slideDown 0.3s ease; 
-        }
-        .feedback-banner.success { 
-            background: #064e3b; 
-            color: #4ade80; 
-            border-left: 5px solid #4ade80; 
-        }
-        .feedback-banner.error { 
-            background: #7f1d1d; 
-            color: #f87171; 
-            border-left: 5px solid #f87171; 
+            border: 4px solid #38bdf8; 
+            box-shadow: 10px 10px 0px #0ea5e9;
+            border-radius: 16px;
+            backdrop-filter: blur(10px);
         }
 
-        /* Navigation Controls Dock */
-        .nav-controls { 
-            display: flex; 
-            flex-wrap: wrap;
-            justify-content: space-between; 
-            gap: 15px; 
-            margin-top: 35px; 
-            border-top: 1px solid #334155; 
-            padding-top: 25px; 
-        }
-        .btn { 
-            padding: 14px 24px; 
-            border: none; 
-            font-size: 1rem; 
-            font-weight: bold; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            transition: all 0.2s ease; 
-        }
-        .btn-secondary { 
-            background: #334155; 
-            color: #cbd5e1; 
-        }
-        .btn-secondary:hover { 
-            background: #475569; 
-            color: #fff;
-        }
-        .btn-secondary:disabled { 
-            opacity: 0.2; 
-            cursor: not-allowed; 
-        }
-        .btn-warning {
-            background: #b45309; /* Amber 700 */
-            color: white;
-        }
-        .btn-warning:hover {
-            background: #d97706; /* Amber 600 */
-        }
-        .btn-primary { 
-            background: #0ea5e9; 
-            color: white; 
-            flex-grow: 1; 
-        }
-        .btn-primary:hover { 
-            background: #38bdf8; 
-        }
-        .btn-success { 
-            background: #22c55e; 
-            color: white; 
-        }
-        .btn-success:hover { 
-            background: #4ade80; 
-        }
-        
-        /* Summary Grid */
-        .results-summary { 
+        /* Retro Title */
+        .retro-title { 
+            font-family: 'Press Start 2P', cursive;
+            font-size: 2.8rem; 
             text-align: center; 
-        }
-        .score-circle { 
-            width: 160px; 
-            height: 160px; 
-            border-radius: 50%; 
-            background: #064e3b; 
-            border: 5px solid #4ade80; 
-            display: flex; 
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center; 
-            margin: 30px auto; 
-            box-shadow: 0 0 20px rgba(74, 222, 128, 0.2);
-        }
-        .score-num { 
-            font-size: 2.5rem; 
-            font-weight: bold; 
-            color: #4ade80; 
-        }
-        .percentage { 
-            font-size: 1.4rem; 
-            font-weight: 600; 
-            color: #e2e8f0; 
-            margin-bottom: 30px; 
-        }
-        .restart-btn { 
-            display: inline-block; 
-            padding: 16px 36px; 
-            background: #0ea5e9; 
-            color: white; 
-            text-decoration: none; 
-            font-weight: bold; 
-            border-radius: 8px; 
-            transition: background 0.2s; 
-        }
-        .restart-btn:hover { 
-            background: #38bdf8; 
+            color: #7dd3fc; 
+            text-shadow: 3px 3px #0ea5e9, 0 0 15px rgba(125,211,252,0.6);
+            margin-bottom: 40px;
+            animation: glowPulse 2s infinite alternate;
         }
 
-        /* Surprise ASCII Art Styles */
-        .ascii-container {
-            margin: 30px auto;
-            padding: 15px;
-            background: #090d16;
-            border: 1px dashed #f43f5e;
-            border-radius: 12px;
-            overflow-x: auto;
-            box-shadow: 0 0 25px rgba(244, 63, 94, 0.15);
-            animation: fadeIn 0.8s ease-out;
+        .retro-sub {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #f9a8d4;
+            margin-top: -20px;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
         }
-        .ascii-art {
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 5px; /* Tiny font size makes sure the complex art maps cleanly without wrapping rows */
-            line-height: 4px;
-            letter-spacing: 0px;
-            color: #f43f5e;
-            text-shadow: 0 0 4px rgba(244, 63, 94, 0.6);
-            white-space: pre;
+
+        /* Pixel Buttons */
+        .start-btn { 
+            display: block; 
+            width: 100%; 
+            padding: 18px; 
+            margin: 15px 0; 
+            font-family: 'Press Start 2P', cursive;
+            background: linear-gradient(145deg, #7dd3fc, #38bdf8);
+            color: #020617; 
+            text-align: center; 
+            cursor: pointer; 
+            font-size: 1.1rem; 
+            box-shadow: 0 6px #0369a1;
+            transition: all 0.15s ease;
+        }
+
+        .start-btn:hover { 
+            transform: translateY(-3px);
+            box-shadow: 0 10px #0369a1;
+        }
+
+        .start-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px #0369a1;
+        }
+
+        /* Floating hearts */
+        .heart {
+            position: absolute;
+            color: #f9a8d4;
+            font-size: 12px;
+            animation: floatUp 6s linear infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes glowPulse {
+            from { text-shadow: 2px 2px #0ea5e9, 0 0 5px #38bdf8; }
+            to { text-shadow: 4px 4px #0ea5e9, 0 0 20px #7dd3fc; }
+        }
+
+        @keyframes floatUp {
+            from { transform: translateY(0); opacity: 0.7; }
+            to { transform: translateY(-600px); opacity: 0; }
+        }
+
+        /* === RESULT IMPROVEMENTS === */
+
+        .percentage {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        .result-message {
+            font-size: 1.1rem;
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .result-perfect { color: #4ade80; }
+        .result-good { color: #38bdf8; }
+        .result-bad { color: #f87171; }
+
+        .restart-btn {
             display: inline-block;
-            text-align: left;
+            padding: 14px 28px;
+            background: linear-gradient(135deg, #38bdf8, #f472b6);
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: 0.2s;
         }
+
+        .restart-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* ASCII container fix */
+        .ascii-container {
+            margin-top: 25px;
+            background: #020617;
+            padding: 15px;
+            border-radius: 10px;
+            overflow-x: auto;
+        }
+
+        /* KEEPING YOUR ORIGINAL STYLES BELOW */
+        h1 { font-size: 1.8rem; text-align: center; color: #38bdf8; margin-bottom: 5px; }
+        .subtitle { text-align: center; color: #94a3b8; font-size: 0.95rem; margin-bottom: 25px; }
+        .progress-container { background: #334155; height: 10px; border-radius: 6px; margin-bottom: 30px; overflow: hidden; }
+        .progress-bar { background: linear-gradient(90deg, #38bdf8, #0ea5e9); height: 100%; transition: width 0.3s ease; }
+        .status-text { font-size: 0.9rem; color: #94a3b8; font-weight: bold; text-align: right; margin-bottom: 15px; }
+        .question-card { animation: fadeIn 0.4s ease; }
+        .question-text { font-size: 1.25rem; font-weight: 600; color: #f8fafc; line-height: 1.6; margin-bottom: 25px; }
+        .options-group { display: flex; flex-direction: column; gap: 14px; margin-bottom: 25px; }
+        .option-label { display: flex; align-items: center; padding: 16px 20px; background: #1e293b; border: 2px solid #475569; border-radius: 10px; cursor: pointer; transition: all 0.2s ease; font-weight: 500; color: #cbd5e1; }
+        .option-label:hover { background: #334155; border-color: #64748b; color: #fff; }
+        .option-label input { margin-right: 14px; transform: scale(1.3); cursor: pointer; accent-color: #38bdf8; }
+        .option-label.selected { border-color: #38bdf8; background: #0c4a6e; color: #f0f9ff; }
+        .option-label.correct-reveal { border-color: #4ade80 !important; background: #064e3b !important; color: #ecfdf5; font-weight: bold; }
+        .option-label.wrong-reveal { border-color: #f87171 !important; background: #7f1d1d !important; color: #fef2f2; }
+        .feedback-banner { padding: 14px 20px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; animation: slideDown 0.3s ease; }
+        .feedback-banner.success { background: #064e3b; color: #4ade80; border-left: 5px solid #4ade80; }
+        .feedback-banner.error { background: #7f1d1d; color: #f87171; border-left: 5px solid #f87171; }
+        .nav-controls { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 15px; margin-top: 35px; border-top: 1px solid #334155; padding-top: 25px; }
+        .btn { padding: 14px 24px; border: none; font-size: 1rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; }
+        .btn-secondary { background: #334155; color: #cbd5e1; }
+        .btn-warning { background: #b45309; color: white; }
+        .btn-primary { background: #0ea5e9; color: white; flex-grow: 1; }
+        .btn-success { background: #22c55e; color: white; }
+        .results-summary { text-align: center; }
+        .score-circle { width: 160px; height: 160px; border-radius: 50%; background: #064e3b; border: 5px solid #4ade80; display: flex; justify-content: center; align-items: center; margin: 30px auto; }
+        .score-num { font-size: 2.5rem; font-weight: bold; color: #4ade80; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes slideDown { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
+
 <body>
 
 <div class="container" x-data="quizApp()">
-    
-    <template x-if="!quizFinished">
-        <div>
-            <div style="text-align: center; margin-bottom: 25px; padding: 20px; background: rgba(56, 189, 248, 0.05); border: 1px dashed #38bdf8; border-radius: 12px;">
-                <span style="font-size: 0.85rem; font-weight: 800; letter-spacing: 2px; color: #f43f5e; text-transform: uppercase; display: block; margin-bottom: 5px; text-shadow: 0 0 8px rgba(244, 63, 94, 0.3);">REVIEWER NI SYA FOR YOU </span>
-                <h2 style="font-size: 2.2rem; margin: 0; font-weight: 800; background: linear-gradient(to right, #f43f5e, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 0px 20px rgba(56, 189, 248, 0.15);">
-                    Good Luck Baby!!! 🤍
-                </h2>
-                <p style="margin: 8px 0 0 0; color: #94a3b8; font-size: 0.95rem; font-style: italic;">
-                    "I know na daghan kag gina study hoping maka help ni para anytime ma practice kag answer, I'm always cheering for you mwaa."
-                </p>
+
+    <!-- START SCREEN -->
+<template x-if="gameState === 'start'">
+    <div style="position: relative; overflow: hidden; min-height: 400px;">
+        
+        <template x-for="i in 20">
+            <div class="heart"
+                 :style="`left:${Math.random()*100}%; animation-delay:${Math.random()*5}s;`">♥</div>
+        </template>
+
+        <h1 class="retro-title">EARTH SCIENCE</h1>
+        <div class="retro-sub">A cute little quiz for you 💖</div>
+
+        <div class="start-btn" @click="playClick(); gameState='playing'">
+            ▶ PRESS START
+        </div>
+
+        <div class="start-btn" style="opacity:0.6;">⚙ OPTIONS</div>
+        <div class="start-btn" style="opacity:0.4;">❌ QUIT</div>
+    </div>
+</template>
+
+<!-- ✅ QUIZ (HIDDEN UNTIL START) -->
+<form x-show="gameState === 'playing'"
+      @submit.prevent="submitExam"
+      action="{{ route('quiz.submit') }}"
+      method="POST"
+      id="mainQuizForm">
+
+    @csrf
+
+    <div x-init="
+        @foreach($questions as $id => $data)
+            questions.push({
+                id: {{ $id }},
+                q: `{{ $data['q'] }}`,
+                correct: '{{ $data['correct'] }}',
+                options: {
+                    @foreach($data['options'] as $letter => $text)
+                        @if(!empty($text)) '{{ $letter }}': `{{ $text }}`, @endif
+                    @endforeach
+                },
+                selectedAnswer: null,
+                checked: false
+            });
+        @endforeach
+        totalQuestions = questions.length;
+    "></div>
+
+    <template x-if="!quizFinished && totalQuestions > 0">
+        <div class="question-card">
+            <div class="question-text">
+                <span x-text="questions[currentIndex].id + '. ' + questions[currentIndex].q"></span>
             </div>
 
-            <h1>Earth Science Practice Examination</h1>
-            <div class="subtitle">Interactive Study Assessment</div>
-            
-            <div class="status-text">Question <span x-text="currentIndex + 1"></span> of <span x-text="totalQuestions"></span></div>
-            <div class="progress-container">
-                <div class="progress-bar" :style="'width: ' + ((currentIndex + 1) / totalQuestions * 100) + '%'"></div>
+            <div class="options-group">
+                <template x-for="(text, letter) in questions[currentIndex].options">
+                    <label class="option-label" :class="{
+                        'selected': questions[currentIndex].selectedAnswer === letter,
+                        'correct-reveal': questions[currentIndex].checked && letter === questions[currentIndex].correct,
+                        'wrong-reveal': questions[currentIndex].checked && questions[currentIndex].selectedAnswer === letter && letter !== questions[currentIndex].correct
+                    }">
+                        <input type="radio" 
+                               :name="'answers[' + questions[currentIndex].id + ']'" 
+                               :value="letter"
+                               x-model="questions[currentIndex].selectedAnswer"
+                               :disabled="questions[currentIndex].checked">
+                        <span x-text="letter + '. ' + text"></span>
+                    </label>
+                </template>
+            </div>
+
+            <template x-if="questions[currentIndex].checked">
+                <div class="feedback-banner" :class="questions[currentIndex].selectedAnswer === questions[currentIndex].correct ? 'success' : 'error'">
+                    <template x-if="questions[currentIndex].selectedAnswer === questions[currentIndex].correct">
+                        <span>✓ Correct! Fantastic job.</span>
+                    </template>
+                    <template x-if="questions[currentIndex].selectedAnswer !== questions[currentIndex].correct">
+                        <span>✗ Incorrect. The correct answer is option <span x-text="questions[currentIndex].correct"></span>.</span>
+                    </template>
+                </div>
+            </template>
+
+            <div class="nav-controls">
+                <div>
+                    <button type="button" class="btn btn-secondary" 
+                            @click="prevQuestion()" 
+                            :disabled="currentIndex === 0">
+                        Back
+                    </button>
+
+                    <button type="button" class="btn btn-warning" 
+                            @click="resetToFirst()" 
+                            :disabled="currentIndex === 0">
+                        Go to #1
+                    </button>
+                </div>
+
+                <div style="display: flex; gap: 15px; flex-grow: 1; justify-content: flex-end;">
+                    <button type="button" class="btn btn-success" 
+                            @click="checkCurrentAnswer()" 
+                            x-show="questions[currentIndex].selectedAnswer && !questions[currentIndex].checked">
+                        Check Answer
+                    </button>
+
+                    <button type="button" class="btn btn-primary" 
+                            @click="nextQuestion()" 
+                            x-show="currentIndex < totalQuestions - 1"
+                            :disabled="!questions[currentIndex].selectedAnswer">
+                        Next
+                    </button>
+
+                    <button type="button" class="btn btn-primary" 
+                            @click="finishQuiz()" 
+                            x-show="hasAnyAnswer()"
+                            style="background: linear-gradient(135deg, #0ea5e9, #f43f5e);">
+                        Finish Exam
+                    </button>
+                </div>
             </div>
         </div>
     </template>
 
-    <form @submit.prevent="submitExam" action="{{ route('quiz.submit') }}" method="POST" id="mainQuizForm">
-        @csrf
-        
-        <div x-init="
-            @foreach($questions as $id => $data)
-                questions.push({
-                    id: {{ $id }},
-                    q: `{{ $data['q'] }}`,
-                    correct: '{{ $data['correct'] }}',
-                    options: {
-                        @foreach($data['options'] as $letter => $text)
-                            @if(!empty($text)) '{{ $letter }}': `{{ $text }}`, @endif
-                        @endforeach
-                    },
-                    selectedAnswer: null,
-                    checked: false
-                });
-            @endforeach
-            totalQuestions = questions.length;
-        "></div>
+    <!-- RESULTS -->
+    <template x-if="quizFinished">
+        <div class="results-summary">
+            <h1>Performance Summary</h1>
 
-        <template x-if="!quizFinished && totalQuestions > 0">
-            <div class="question-card">
-                <div class="question-text">
-                    <span x-text="questions[currentIndex].id + '. ' + questions[currentIndex].q"></span>
+            <div class="score-circle">
+                <div class="score-num">
+                    <span x-text="finalScore"></span> /
+                    <span x-text="totalQuestions"></span>
                 </div>
+            </div>
 
-                <div class="options-group">
-                    <template x-for="(text, letter) in questions[currentIndex].options">
-                        <label class="option-label" :class="{
-                            'selected': questions[currentIndex].selectedAnswer === letter,
-                            'correct-reveal': questions[currentIndex].checked && letter === questions[currentIndex].correct,
-                            'wrong-reveal': questions[currentIndex].checked && questions[currentIndex].selectedAnswer === letter && letter !== questions[currentIndex].correct
-                        }">
-                            <input type="radio" 
-                                   :name="'answers[' + questions[currentIndex].id + ']'" 
-                                   :value="letter"
-                                   x-model="questions[currentIndex].selectedAnswer"
-                                   :disabled="questions[currentIndex].checked">
-                            <span x-text="letter + '. ' + text"></span>
-                        </label>
-                    </template>
-                </div>
+            <div class="percentage">
+                Final Grade:
+                <span x-text="Math.round((finalScore / totalQuestions) * 100)"></span>%
+            </div>
 
-                <template x-if="questions[currentIndex].checked">
-                    <div class="feedback-banner" :class="questions[currentIndex].selectedAnswer === questions[currentIndex].correct ? 'success' : 'error'">
-                        <template x-if="questions[currentIndex].selectedAnswer === questions[currentIndex].correct">
-                            <span>✓ Correct! Fantastic job.</span>
-                        </template>
-                        <template x-if="questions[currentIndex].selectedAnswer !== questions[currentIndex].correct">
-                            <span>✗ Incorrect. The correct answer is option <span x-text="questions[currentIndex].correct"></span>.</span>
-                        </template>
-                    </div>
+            <!-- 🔥 NEW RESULT MESSAGE -->
+            <div class="result-message"
+                 :class="{
+                    'result-perfect': (finalScore / totalQuestions) >= 0.8,
+                    'result-good': (finalScore / totalQuestions) >= 0.5 && (finalScore / totalQuestions) < 0.8,
+                    'result-bad': (finalScore / totalQuestions) < 0.5
+                 }">
+
+                <template x-if="(finalScore / totalQuestions) >= 0.8">
+                    <span>🌟 Excellent! You're amazing!</span>
                 </template>
 
-                <div class="nav-controls">
-                    <div>
-                        <button type="button" class="btn btn-secondary" 
-                                @click="prevQuestion()" 
-                                :disabled="currentIndex === 0">
-                            Back
-                        </button>
+                <template x-if="(finalScore / totalQuestions) >= 0.5 && (finalScore / totalQuestions) < 0.8">
+                    <span>👍 Good job! Keep improving!</span>
+                </template>
 
-                        <button type="button" class="btn btn-warning" 
-                                @click="resetToFirst()" 
-                                :disabled="currentIndex === 0"
-                                title="Go back to question #1">
-                            Go to #1
-                        </button>
-                    </div>
+                <template x-if="(finalScore / totalQuestions) < 0.5">
+                    <span>💔 Don't worry, try again!</span>
+                </template>
+                
 
-                    <div style="display: flex; gap: 15px; flex-grow: 1; justify-content: flex-end;">
-                        <button type="button" class="btn btn-success" 
-                                @click="checkCurrentAnswer()" 
-                                x-show="questions[currentIndex].selectedAnswer && !questions[currentIndex].checked">
-                            Check Answer
-                        </button>
-
-                        <button type="button" class="btn btn-primary" 
-                                @click="nextQuestion()" 
-                                x-show="currentIndex < totalQuestions - 1"
-                                :disabled="!questions[currentIndex].selectedAnswer">
-                            Next
-                        </button>
-
-                        <button type="button" class="btn btn-primary" 
-                                @click="finishQuiz()" 
-                                x-show="hasAnyAnswer()"
-                                style="background: linear-gradient(135deg, #0ea5e9, #f43f5e);">
-                            Finish Exam
-                        </button>
-                    </div>
-                </div>
             </div>
-        </template>
 
-        <template x-if="quizFinished">
-            <div class="results-summary">
-                <h1>Performance Summary</h1>
-                <p class="subtitle">Your final metrics are computed below:</p>
-
-                <div class="score-circle">
-                    <div class="score-num"><span x-text="finalScore"></span> / <span x-text="totalQuestions"></span></div>
-                </div>
-
-                <div class="percentage">Final Grade: <span x-text="Math.round((finalScore / totalQuestions) * 100)"></span>%</div>
-
-                <div class="ascii-container">
-                    <div style="color: #cbd5e1; font-size: 0.9rem; font-weight: bold; margin-bottom: 10px; font-style: italic;">
-                        Surprise! Super proud of you babyyy! 🤍✨
-                    </div>
-                    <pre class="ascii-art">:::::::::::::::::::::::::::::::::::::::::::---===+*##############%%%%%%%%%#+=---::::::::::::::::::::
-::::::::::::::::::::::::::::::::::::::::::---===+*####%%%%%%%%######%%%%%%%%%#+---::::::::::::::::::
-:::::::::::::::::::::::::::::::::::::::::::--===+*##%%%%%%%%%%%%%%%%%%%%%%%%%%%%*=--:--:::::::::::::
-::::::::::::::::::::::::::::::::::::::::-----==+*##%%%%%%%%%#######%%%%%%%%%%%%%%%*=-:::::::::::::::
-::::::::::::::::::::::::::::::::::::::::-=+**###%%%%%%%%%%%%###%%%%%%%%%%%%%%%%%%%%*--:::::::::::::
-::::::::::::::::::::::::::::::::::::::::--+*###%%%####%%%%%########%%%%%%%%%%%%%%%%%%#+--:::::::::::
-:::::::::::::::::::::::::::::::::::::::--=*####%%#####################%%%%%%%%%%%%%%%%%*=-::::::::::
-::::::::::::::::::::::::::::::::::::::---*#####%%#**###*******++++++++***##%%%%%%%%%%%%%%=-:::::::::
-:::::::::::::::::::::::::::::::::::::---+*####%%#*****++++++==============++*#%%%%%%%%%%%#+-::::::::
-:::::::::::::::::::::::::::::::::::::-=+*########**+=======-------------=====+##%%%%%%%%%%#=-:::::::
-:::::::::::::::::::::::::::::::::::::-=*########*+====---------------------===+*#%%%%%%%%%%*----:::-
-::::::::::::::::::::::::::::::::::::-=+*#######*+===-------------------------===++*#%%%%%%%%+-------
-::::::::::::::::::::::::::::::::::::-+*##%%#%#*+==-------------:::------------====++*%%%%%%%%*------
-::::::::::::::::::::::::::::::::::::=*##%%%%%*+===--------------::::::---------======*#%%%%%%%#-----
-::::::::::::::::::::::::::::::::::::=*#%%%%%#*+==---------------:::::::--=====------==+###*#%%%+----
-::::::::::::::::::::::::::::::::::::=*#%%%%%#+==-----------------::::-====-----------==+*#**+#%%=---
-::::::::::::::::::::::::::::::::::::-*#%%%%%#+===-------------------=+++=---=====------=+**+=#%#+---
-::::::::::::::::::::::::::::::::::::-+#%%%%%#++===----------------=++++===+***+=-------==++=+#%#+---
-::::::::::::::::::::::::::::::::::::-+#%%%%%#*+===--------------==+++++*#***------------=++=+%%#+---
-::::::::::::::::::::::::::::::::::::-=+%%%%%%*+===-------------==+++++*+#%#=-=----------==+==#%#=---
-::::::::::::::::::::::::::::::::::::--=*%%%%%%*====------=====--===++**+===++=-::::-----====**%#=---
-::::::::::::::::::::::::::::::::::::--=+%%%%%%%*===--===+++++==-----===+++=---:::::-----===+#%%#=---
-:::::::::::::::::::::::::::::::::::::--=*%%%%%%%+=++*********+==-----------:::::::-------==+#@@#=---
-:::::::::::::::::::::::::::::::::::::---=#%%%@@@%**++++++**++++=--::::::--:::::::---------==*%%%+=--
-:::::::::::::::::::::::::::::::::::::----+#%%@@@@%++****%%#+====---:::--==-----------------=+#%%*=--
-::::::::::::::::::::::::::::::::::::::---=+#%%@@@@%*##++++++===-=--:::----====-------------==*%##=--
-::::::::::::::::::::::::::::::::::::------=+%%@@@@@#++++++=----==--:::::---=--------------===+#%#=-=
-:::::::::::::::::::::::::::::::::::--------=+%%%%%%%*+==------====--:---==+-::------------==+=+%*=--
-::::::::::::::::--::::::::::::::::--------=*###%%%%%%#+==-----===========---:---=====---===++==*+---
-:::::::::::::::-==::::::::::::::----------+*####%%%%%%%#+======++**#*++=------==+===---===+++===++++
-::::-=+=::::::-==:::::::::::::-----========**####%%%%%%%%*++====++++==-=====+++=-----===++++===+#%%%
-:::==-:::::--==-::::::::::::--=+*#####%%%##*#%%%%%%%%@%%%%#####****+++++++++==-----====++++==+#%%%%%
-:::::::::-=+=----:::::::::-=+*########%%%%%%%%%%%@@%%@@%%%%%%%%%%%%%###*+===-----=====+++*+*#%%%%%%%
-:::::::-+=------==--------=+############%%%%@@@%@@%%%%%%%%%%%%%%%%%%%%%#+============+++*%%%%%%%%%%%
-:----=+=---======--=----=+*##%#%%%%%%%%%%%%%%@@@%%%%%%%%%%%%%%#%%%%%%%%%%#*+=========+*#%%%%%%%%%%@%
-:--------===+=++=-==---=+##%%%%%%%###%%%%@@@%%@%%@%%%%%%%%%##%%%%%%%%%%%%%%*+++=+++++#%@%%%%%%%%%%%%
-::--------==++=+===-===+#%%%%%%%%%%%%%%%%%%%%####%%%%%%%%%%%%%%%%%%%%@@@%%@%##****#%@@@%%%%%%@@%%%%%
-------::-:---=======++=#%%%%%%%%%%@@@%#*+++=====++*##%%%%%%%%%#%%%%%@@@@@@@@%%%%@@@@@@@@%%@@@@%%%%%%
---=-----:::------==++=*%%%%%%%%%@@%#*+===---------===+**###%%%%%%%%%%@@@@@@@@@@@@@@@@@@@%@@@%%%%%%%%
-----=+==------------=*%%%%%%%%@@%#+====--------------====+**##%%%%%%@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%
--------======-----:::-=*%%%%%%%%*+==-------------------====+**#%%@@@@@@@@@@@@@@@@%%%%@@@%%%%%%%%%%%%
-=-------------===---::----*%%%#+==----------------------====++*#%@@@@@@@@@@@@@@@@%%%%%@@@%%%%%%%%%%@
-*++==--------------==-----:-+*+==-----------------------=====++*#@@@@@@@@@@@@@@@@%%%%@@@%%%%%%%%%%@@
-++****+====------:::---==-:::=+===------::::-------------=====++*%@@@@@@@@@@@%%%%%%%%@@%%%%%%%%%%@@@
-++***##+=-======-------:::==++++++==-::--:::::-----------======+*#%%%@@@@@@@%%%%%%%%@@%%%%%%%%%%%@@@
-****+=---------=======----::=++++**###*=--:::::::::-::----======+#%%%%@@@@@%%%%%@%%@@@%%%%%%%%@@@@@@
-#*+---------======+#%%#*+-::--------=+***+=-------:--------====+*#%%%%%@@@%%%%%%@@%%@@%%%%@%%@@@@@@@
-##*+=-----=====+*%%%%%%%@#=-----------=======-----------======++*#%%%%@@@%%##%%%%%@@%%@%@@@@@@@@@@@@
-####**+=-====+#%%%%%%%%%#+==--==-----========----====+*####%%#####%%%@@@%%%%%%%%@@@@@@@@@@@@@@%%@@@%
-#######**+++*#%%%#%%%%%%+==-==+***#****+===------=+++++======+*##%%%@@%@%%%%%@@@@@@@@@%@%@@@%%%%@%%%
-****#######*#%%*%%%%%%%*==----==========+===----=++++++==-----==+#%@@@%%%@@%@@@%%%%%%%@%%%%%%%%%%%%%
-++++****######*#%%%%%%#+==--------==========----=++=+****++++===++%@@@%%%@@%%%%@%%%%%%%%%@%%%%%%%%%%
-+++++++*******###%%###*==-----------=======-------=====++++*#%*++*%@@@%%@@@%%%%%%%%%%%%%%%@%%%%%%%@@
-+++++++++******##%#+*#+=-------------==-------::::::---====++++++*%@%%@@@@@%%%%%@%%%%%%%%%%%%%%%%%%@
-++++++++++++****##*=*#+=---=---------==------:::::::::-------===+*%@%%@@%@@%%@%%%@%%%%%%%%%@%%%%%%%%
-+++++++++++++****#+==*==-:------------==--::::::::::::::::----==+*%@%@@@%%@%%%%%%%%%%%%%%%%%@%%%%%%%
-++++++++++++++****+==+==--------------=-::::::::-=-----::::--===+*%%%@@@@%@@%%@%%%%%%%%%@@%%%%%%%%%
-+++++++++++++++***#+=+=-------:::-----==------===++==----:::--==+*%@@@@@%%@@%%@%%%%%%%%%%%%@%@@%%%%%
-+++++++++++++++***#%*+=----+=-------:::--=+====---==+=--::::---==*%@@@@@%%%@@%%@%%%@%%%%%%%@@%@@@%%@
-+++++++++++++++***###+==-----==------:::::--===--==+++---------===*%@@@@%%%@@%%@@%%@@%%%%%%%@%%@@%%%
-+++++++++++++++******+==---::--=-----::::::::---===+-----------====+%@@@@@@@@@%%@@%%@@%%%%%%@@@%@@%@
-==+*++++++++++******#+===--------=----::::::::::----------------====+*%%%@@@@@@%@@@%@@%%%%%%%@@@@@@@
-==+++**************##+==----------------:::::::::::-------------======+++*##%@@@@@@@%@@%%%%@%@@@@@@@
-==+===+************##+=---==------::--==--:::::::---------------============++*#%%@@@@@@@%@@%@@@@@@@
-=++====*%%%###%%%@%%*++=--=+==------::---=------::---============================++**#%@@@@@@@@@@@@@
-=+====+*#@@%%##%@@#=+++=----=++=----------===-----========================+++=========++++*#%%@@@@@@
-++====%%#%@@@%##*===++++-----=++==---------==================+===++++++===++++==============++++**##
-++===+%%%#%@@@%##%%*++++=------======---===============+++++++++++++++++++++++++====------=======+++
-+====+#%@%%%@@@@@@#+++++-==---------===================+++++++++++++++++++++++++++===-------========
-+==++%%@@@@@@@@@@%*++++++-===----------==============++++++++++++**++******++++++++=====------======
-#%%@@@@@@@@@@@@@%#++++++*+=-====---------======--===+++++++++++*************+++++++=================
-@@@@@@@@@@@@@@@@%*+++++++*+=======-------====+++==+++++**********************+++++++================
-@@@@@@@@@@@@@@@%#++=++++++**+===============++++++++++***************************+++++==============</pre>
-                </div>
-
-                <div style="margin-top: 30px;">
-                    <a href="{{ route('quiz.index') }}" class="restart-btn">Retake Examination</a>
-                </div>
+            <div style="margin-top: 30px;">
+                <a href="{{ route('quiz.index') }}" class="restart-btn">
+                    Retake Examination
+                </a>
             </div>
-        </template>
-    </form>
+        </div>
+    </template>
+
+</form>
+</div>
 </div>
 
 <script>
 function quizApp() {
     return {
+        gameState: 'start',
         currentIndex: 0,
         totalQuestions: 0,
         questions: [],
         quizFinished: false,
         finalScore: 0,
 
-        nextQuestion() {
-            if (this.currentIndex < this.totalQuestions - 1) {
-                this.currentIndex++;
-            }
+        playClick() {
+            const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3');
+            audio.volume = 0.3;
+            audio.play();
         },
 
-        prevQuestion() {
-            if (this.currentIndex > 0) {
-                this.currentIndex--;
-            }
-        },
-
-        resetToFirst() {
-            this.currentIndex = 0;
-        },
-
-        hasAnyAnswer() {
-            return this.questions.some(q => q.selectedAnswer !== null);
-        },
-
-        checkCurrentAnswer() {
-            this.questions[this.currentIndex].checked = true;
-        },
-
+        nextQuestion() { if (this.currentIndex < this.totalQuestions - 1) this.currentIndex++; },
+        prevQuestion() { if (this.currentIndex > 0) this.currentIndex--; },
+        resetToFirst() { this.currentIndex = 0; },
+        hasAnyAnswer() { return this.questions.some(q => q.selectedAnswer !== null); },
+        checkCurrentAnswer() { this.questions[this.currentIndex].checked = true; },
         finishQuiz() {
             let score = 0;
-            this.questions.forEach(q => {
-                if (q.selectedAnswer === q.correct) {
-                    score++;
-                }
-            });
+            this.questions.forEach(q => { if (q.selectedAnswer === q.correct) score++; });
             this.finalScore = score;
             this.quizFinished = true;
         }
     }
 }
 </script>
+
 </body>
 </html>
